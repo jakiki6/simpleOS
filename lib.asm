@@ -45,7 +45,6 @@ print_char:
 ; ouput:
 ;	none
 halt:
-	cli
 	hlt
 	jmp halt
 
