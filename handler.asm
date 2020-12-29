@@ -4,7 +4,11 @@ setup_handler:
 
 	mov dx, handler_div
 	call register_interrupt
+	mov al, 0x02
 	mov dx, handler_nmi
+	call register_interrupt
+	mov al, 0x06
+	mov dx, handler_ill
 	call register_interrupt
 
 	ret
@@ -51,4 +55,15 @@ handler_nmi:
         call print_string
         pop es
         pop si
+        iret
+
+handler_ill:
+	push si
+        push es
+        push 0x1000
+        pop es 
+        mov si, errors.ill_opcode
+        call print_string
+        pop es   
+        pop si   
         iret

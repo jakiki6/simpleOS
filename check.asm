@@ -9,5 +9,5 @@ setup_check:
 	jmp short .s1
 .err:	mov si, errors.cpuid
 	call print_string
-	call halt
+	call panic
 .s1:	ret
