@@ -29,37 +29,78 @@ setup_sched:
 	sti
 	ret
 
-irq:	int backup
-	cli
+irq:	cli
+	int backup
 	jmp irq_save
 .s1:	call sched
 	jmp irq_load
-	iret
 
 irq_save:
         ; structure:
-        ;       es ds regs ip cs flags
+        ;       ss es ds regs ip cs flags
         ;        = 14 bytes            \ save
         pusha
         push ds
         push es
-
+	push ss
         cs mov word [save_sp], sp
-        cs mov word [save_ss], ss
+	cs mov word [save_ss], ss
 
 	push 0x2000
 	pop ss
         mov sp, stack
-        push cs
-        pop ds 
-        push cs
+	push cs
+	pop ds
+
+	mov ax, [save_ss]
+        push ax
         pop es
+	mov si, word [save_sp]
+	mov di, word [pid]
+	shl di, 4
+	push 0x3000
+	pop ds
+
+	mov cx, 16
+.loop:	lodsb
+	ds stosb
+	loop .loop
+
+	push cs
+	pop ds
+	push cs
+	pop es
 
         jmp irq.s1
 
 irq_load:
+	mov si, word [pid]
+	shl si, 4
+	push 0x3000
+	pop ds
+
+;	mov ax, word [si+9]
+;	cs mov word [save_sp], ax
+;	mov ax, word [si]
+;	cs mov word [save_ss], ax
+
+	mov di, word [save_sp]
+	mov ax, word [save_ss]
+	push ax
+	pop es
+
+	mov cx, 16
+.loop:	ds lodsb
+	stosb
+	loop .loop
+
+	push cs
+	pop ds
+
         mov sp, word [save_sp]
-        mov ss, word [save_ss]
+	mov ss, word [save_ss]
+
+	pop ss        
         pop es
         pop ds
         popa
@@ -73,4 +114,6 @@ sched:
 save_sp:
 	dw 0
 save_ss:
+	dw 0
+pid:
 	dw 0
