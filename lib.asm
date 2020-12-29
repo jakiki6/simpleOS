@@ -86,3 +86,24 @@ input_line:
 	call print_char
 	jmp .s2
 .tmp1:	dw 0
+
+; name: panic
+; desc: panic
+; input:
+;	none
+; ouput:
+;	none
+panic:
+	mov si, errors.panic
+	call print_string
+	call read_key
+	call reboot
+
+; name: reboot
+; desc: reboot
+; input:
+;       none
+; ouput:
+;	none
+reboot:
+	jmp 0xffff:0x0000
