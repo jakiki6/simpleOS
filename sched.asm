@@ -26,6 +26,13 @@ setup_sched:
 	push cs
 	pop es
 
+	push 0x3000
+	pop ds
+	mov byte [63], 1
+
+	push cs
+	pop ds
+
 	sti
 	ret
 
@@ -43,6 +50,8 @@ irq_save:
         push ds
         push es
 	push ss
+
+.pushdone:
         cs mov word [save_sp], sp
 	cs mov word [save_ss], ss
 
@@ -119,10 +128,13 @@ sched:
 	push 0x3000
 	pop ds
 	cs mov si, word [pid]
+	inc si
 	shl si, 6
 .loop:	mov al, byte [si+63]
 	cmp al, 0
-	je .found
+	je .notfound
+	jmp .found
+.notfound:
 	add si, 64
 	jmp .loop
 .found:	shr si, 6
