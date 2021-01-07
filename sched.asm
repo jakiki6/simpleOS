@@ -57,14 +57,21 @@ irq_save:
         pop es
 	mov si, word [save_sp]
 	mov di, word [pid]
-	shl di, 4
+	shl di, 6
 	push 0x3000
 	pop ds
+	push di
 
-	mov cx, 16
+	mov cx, 32
 .loop:	lodsb
 	ds stosb
 	loop .loop
+
+	pop di
+	cs mov ax, word [save_sp]
+	mov word [di+32], ax
+	cs mov ax, word [save_ss]
+	mov word [di+34], ax
 
 	push cs
 	pop ds
@@ -75,21 +82,21 @@ irq_save:
 
 irq_load:
 	mov si, word [pid]
-	shl si, 4
+	shl si, 6
 	push 0x3000
 	pop ds
 
-;	mov ax, word [si+9]
-;	cs mov word [save_sp], ax
-;	mov ax, word [si]
-;	cs mov word [save_ss], ax
+	mov ax, word [si+32]
+	cs mov word [save_sp], ax
+	mov ax, word [si+34]
+	cs mov word [save_ss], ax
 
 	mov di, word [save_sp]
 	mov ax, word [save_ss]
 	push ax
 	pop es
 
-	mov cx, 16
+	mov cx, 32
 .loop:	ds lodsb
 	stosb
 	loop .loop
