@@ -116,6 +116,17 @@ irq_load:
 
 ; do your fancy stuff here
 sched:
+	push 0x3000
+	pop ds
+	cs mov si, word [pid]
+	shl si, 6
+.loop:	mov al, byte [si+63]
+	cmp al, 0
+	je .found
+	add si, 64
+	jmp .loop
+.found:	shr si, 6
+	mov word [pid], si
 	ret
 
 save_sp:
