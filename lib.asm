@@ -107,3 +107,58 @@ panic:
 ;	none
 reboot:
 	jmp 0xffff:0x0000
+
+; name: print_hex_byte
+; desc: prints one byte as hex
+; input:
+;	al: byte to print
+; output:
+;	none
+print_hex_byte:
+	push ax
+	push cx
+	push bx
+
+	lea bx, [.table]
+
+	mov ah, al
+	and al, 0x0f
+	mov cl, 4
+	shr ah, cl
+	xlat
+	xchg ah, al
+	xlat
+
+	mov bx, 0x0007
+	mov ch, ah
+	mov ah, 0x0e
+	int 0x10
+	mov al, ch
+	int 0x10
+
+	pop bx
+	pop cx
+	pop ax
+	ret
+.table: db "0123456789ABCDEF", 0
+
+; name: print_hex
+; dex: prints an array of hex values
+; input:
+;	si: pointer to array
+;	cx: length of array
+; output:
+;	none
+print_hex:
+	push ax
+	push si
+	push cx
+
+.loop:	lodsb
+	call print_hex_byte
+	loop .loop
+
+	pop cx
+	pop si
+	pop ax
+	ret
