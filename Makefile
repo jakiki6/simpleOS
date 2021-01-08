@@ -1,5 +1,5 @@
 run: os.img
-	qemu-system-i386 -hda $< --enable-kvm
+	qemu-system-i386 -hda $< --enable-kvm -monitor telnet:127.0.0.1:1337,server,nowait
 
 os.img: loader.bin kernel.bin
 	cat loader.bin > os.img
